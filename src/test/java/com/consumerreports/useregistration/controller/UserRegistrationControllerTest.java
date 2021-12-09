@@ -64,7 +64,7 @@ public class UserRegistrationControllerTest {
     public void registerUserTest() {
         doNothing().when(service).registerUser(any());
         Model model = new ExtendedModelMap();
-        UserDetails userinfo = new UserDetails(1l, "firstName", "lastName", "email");
+        UserDetails userinfo = new UserDetails(1l, "firstName", "lastName", "email@email.com");
         String response = userRegistrationController.registerUser(userinfo, model);
         Assert.notNull(response, "response mustn't be empty");
         Assert.isTrue(response.equals("view-result"), "response should be view-result");
@@ -74,18 +74,28 @@ public class UserRegistrationControllerTest {
     @Test
     public void registerUserVAlidationErrorTest() {
         Model model = new ExtendedModelMap();
-        UserDetails userinfo = new UserDetails(1l, "firstName", "lastName", "");
+        UserDetails userinfo = new UserDetails(1l, "firstName", "", "email");
         String response = userRegistrationController.registerUser(userinfo, model);
         Assert.notNull(response, "response mustn't be empty");
         Assert.isTrue(response.equals("register-user"), "response should be register-user");
-        Assert.isTrue((boolean) model.getAttribute("validationError"), "success should be true");
+        Assert.isTrue((boolean) model.getAttribute("validationError"), "validationError should be true");
+    }
+    
+    @Test
+    public void registerUserEmailVAlidationErrorTest() {
+        Model model = new ExtendedModelMap();
+        UserDetails userinfo = new UserDetails(1l, "firstName", "lastName", "email");
+        String response = userRegistrationController.registerUser(userinfo, model);
+        Assert.notNull(response, "response mustn't be empty");
+        Assert.isTrue(response.equals("register-user"), "response should be register-user");
+        Assert.isTrue((boolean) model.getAttribute("emailValidationError"), "emailValidationError should be true");
     }
 
     @Test
     public void registerUserWithErrorTest() {
         doThrow(new RuntimeException()).when(service).registerUser(any());
         Model model = new ExtendedModelMap();
-        UserDetails userinfo = new UserDetails(1l, "firstName", "lastName", "email");
+        UserDetails userinfo = new UserDetails(1l, "firstName", "lastName", "email@email.com");
         String response = userRegistrationController.registerUser(userinfo, model);
         Assert.notNull(response, "response mustn't be empty");
         Assert.isTrue(response.equals("view-result"), "response should be view-result");

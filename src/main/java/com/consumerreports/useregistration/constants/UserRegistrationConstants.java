@@ -14,5 +14,6 @@ public class UserRegistrationConstants {
     public static final String USERS_DETAILS = "userDetails";
     public static final String ERROR_INDICATOR = "error";
     public static final String VALIDATION_ERROR_INDICATOR = "validationError";
+    public static final String EMAIL_VALIDATION_ERROR_INDICATOR = "emailValidationError";
 
 }

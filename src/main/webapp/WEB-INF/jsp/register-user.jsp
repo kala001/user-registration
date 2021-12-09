@@ -14,8 +14,12 @@
         <title>Register User</title>
     </head>
     <body>
-        <c:if test="${registerUserSuccess}">
-            <div>Unable to RegisterUser. All fields are mandatory and email should be in pattern test@test.com</div>
+        <c:if test="${validationError}">
+            <div style="color:red">Unable to RegisterUser. All fields are mandatory and first name and last name must be of more than 3 characters long. email should be in pattern username@domain.com</div>
+        </c:if>
+        
+         <c:if test="${emailValidationError}">
+            <div style="color:red">Unable to RegisterUser. Email should be in pattern username@domain.com</div>
         </c:if>
     
         <c:url var="registerUserUrl" value="/register/registerUser"/>

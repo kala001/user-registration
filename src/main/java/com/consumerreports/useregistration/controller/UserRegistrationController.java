@@ -1,6 +1,7 @@
 package com.consumerreports.useregistration.controller;
 
 import static com.consumerreports.useregistration.constants.UserRegistrationConstants.ERROR_INDICATOR;
+import static com.consumerreports.useregistration.constants.UserRegistrationConstants.EMAIL_VALIDATION_ERROR_INDICATOR;
 import static com.consumerreports.useregistration.constants.UserRegistrationConstants.NEW_USER_REGISTRATION_MAPPING;
 import static com.consumerreports.useregistration.constants.UserRegistrationConstants.NO_USERS_INDICATOR;
 import static com.consumerreports.useregistration.constants.UserRegistrationConstants.REGISTER_STATUS_PAGE;
@@ -22,7 +23,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -92,15 +92,18 @@ public class UserRegistrationController {
     @PostMapping(NEW_USER_REGISTRATION_MAPPING)
     public String registerUser(@ModelAttribute("userDetails") @Valid UserDetails userDetails, Model model) {
         try {
-            if (userDetails != null && validate(userDetails) && validateEmail(userDetails.getEmail())) {
-                userRegistrationService.registerUser(userDetails);
-                model.addAttribute(SUCCESS_INDICATOR, true);
-            } else {
+            if (userDetails == null || !validate(userDetails)) {
                 model.addAttribute(VALIDATION_ERROR_INDICATOR, true);
                 model.addAttribute("userDetails", new UserDetails());
                 return REGISTER_USER_PAGE;
+            } else if (!validateEmail(userDetails.getEmail())) {
+                model.addAttribute(EMAIL_VALIDATION_ERROR_INDICATOR, true);
+                model.addAttribute("userDetails", new UserDetails());
+                return REGISTER_USER_PAGE;
+            } else {
+                userRegistrationService.registerUser(userDetails);
+                model.addAttribute(SUCCESS_INDICATOR, true);
             }
-           
         } catch (Exception ex) {
             model.addAttribute(ERROR_INDICATOR, true);
         }
@@ -108,16 +111,17 @@ public class UserRegistrationController {
     }
     
     private boolean validate(UserDetails userDetails) {
-        return (StringUtils.hasLength(userDetails.getEmail()) && StringUtils.hasLength(userDetails.getFirstName()) && StringUtils.hasLength(userDetails.getLastName()));
+        return (StringUtils.hasLength(userDetails.getEmail()) && hasMinimumLenght(userDetails.getFirstName(), 3) && hasMinimumLenght(userDetails.getLastName(), 3));
     }
     
     private boolean validateEmail(String email) {
-        
-        String regex = "^(.+)@(.+)$";
-        
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
+    }
+    
+    private static boolean hasMinimumLenght(String s, int lenght) {
+        return (StringUtils.hasLength(s) && s.trim().length() >= lenght);
     }
 
 }
